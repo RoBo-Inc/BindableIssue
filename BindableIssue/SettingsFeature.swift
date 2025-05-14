@@ -7,6 +7,10 @@ struct Settings {
     struct State: Equatable {
         var something: Something
         // ...
+        
+        struct Something: Equatable {
+            var flag = false
+        }
     }
     
     enum Action: BindableAction {
@@ -14,7 +18,12 @@ struct Settings {
     }
     
     var body: some Reducer<State, Action> {
-        BindingReducer()
+        BindingReducer().onChange(of: \.something.flag) { oldValue, newValue in
+            Reduce { state, action in
+                print("Changed from \(oldValue) to \(newValue)")
+                return .none
+            }
+        }
         Reduce { state, action in
             switch action {
             case .binding(\.something.flag):
@@ -38,21 +47,9 @@ struct SettingsView: View {
     }
     
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            
-            Text("Hello, world!")
-            
-            Toggle("Flag", isOn: $store.something.flag)
-        }
-        .padding()
+        Toggle("Flag", isOn: $store.something.flag)
+            .padding()
     }
-}
-
-struct Something: Equatable {
-    var flag = false
 }
 
 #Preview {
